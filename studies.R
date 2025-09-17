@@ -5,6 +5,8 @@ library(httpgd)
 
 # https://r4ds.hadley.nz/data-visualize.html
 
+
+############################### 1.2 FIRST STEPS ###############################
 # Print a preview of the data frame contents
 penguins
 
@@ -24,8 +26,7 @@ ggplot(
     color = "Species", shape = "Species"
 	) +
 	scale_color_colorblind()
-
-########## Exercises ##########
+############################### 1.2 Exercises ###############################
 # 1
 num_rows <- nrow(penguins)
 num_col <- ncol(penguins)
@@ -60,7 +61,8 @@ ggplot(data = penguins) +
 ggplot(data = penguins, 
 			mapping = aes(x = bill_length_mm, y = bill_depth_mm)) +
 	geom_point(na.rm = TRUE)
-#na.rm: If FALSE, the default, missing values are removed with a warning. If TRUE, missing values are silently removed.
+#na.rm: If FALSE, the default, missing values are removed with a warning. 
+# If TRUE, missing values are silently removed.
 
 
 # 7 
@@ -111,3 +113,15 @@ ggplot() +
     data = penguins,
     mapping = aes(x = flipper_length_mm, y = body_mass_g)
   )
+
+###############################################################################
+
+############################## 1.3 GGPLOT2 CALLS ##############################
+# Pipe
+penguins |> 
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point()
+
+######################## 1.4 VISUALIZING DISTRIBUTIONS ########################
+
+
