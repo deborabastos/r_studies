@@ -88,7 +88,6 @@ ggplot(data = penguins,
   geom_point()
 
 
-
 # 6
 ggplot(data = penguins, 
 			mapping = aes(x = bill_length_mm, y = bill_depth_mm)) +
@@ -176,5 +175,69 @@ penguins |>
   geom_point()
 
 ######################## 1.4 VISUALIZING DISTRIBUTIONS ########################
+
+ggplot(penguins, aes(x = species)) +
+  geom_bar()
+
+#reorder the bars based on their frequencies
+ggplot(penguins, aes(x = fct_infreq(species))) +
+  geom_bar()
+
+#numerical variable
+ggplot(penguins, aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 200)
+
+ggplot(penguins, aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 20)
+
+ggplot(penguins, aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 2000)
+
+ggplot(penguins, aes(x = body_mass_g)) +
+  geom_density()
+
+############################### 1.3 Exercises ###############################
+# 1
+penguins |>
+  ggplot(aes(y = species)) +
+  geom_bar()
+
+penguins |>
+  ggplot(aes(y = fct_infreq(species))) +
+  geom_bar()
+
+#2
+penguins |>
+	ggplot(aes(x = species)) +
+		geom_bar(color = "red")
+
+
+penguins |>
+	ggplot(aes(x = species)) +
+  geom_bar(fill = "red")
+
+# 3
+# o bins define o número de barras do histograma
+
+# 4
+diamonds |>
+  ggplot(aes(x = carat)) +
+  geom_histogram()
+
+diamonds |>
+  ggplot(aes(x = carat)) +
+  geom_histogram(binwidth = 0.05)
+
+diamonds |>
+  ggplot(aes(x = carat)) +
+  geom_histogram(binwidth = 0.10)
+
+diamonds |>
+  ggplot(aes(x = carat)) +
+  geom_histogram(binwidth = 0.5)
+
+###############################################################################
+
+######################## 1.4 Visualizing relationships ########################
 
 
