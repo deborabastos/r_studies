@@ -2,6 +2,7 @@ library(tidyverse)
 library(palmerpenguins)
 library(ggthemes)
 library(httpgd)
+library(summarytools)
 
 # https://r4ds.hadley.nz/data-visualize.html
 
@@ -196,7 +197,7 @@ ggplot(penguins, aes(x = body_mass_g)) +
 ggplot(penguins, aes(x = body_mass_g)) +
   geom_density()
 
-############################### 1.3 Exercises ###############################
+############################### 1.4 Exercises ###############################
 # 1
 penguins |>
   ggplot(aes(y = species)) +
@@ -238,6 +239,150 @@ diamonds |>
 
 ###############################################################################
 
-######################## 1.4 Visualizing relationships ########################
+######################## 1.4 VISUALIZING RELALTIONSHIPS #######################
+
+ggplot(penguins, aes(x = species, y = body_mass_g)) +
+  geom_boxplot()
+
+ggplot(penguins, aes(x = body_mass_g, color = species)) +
+  geom_density(linewidth = 0.75)
+
+ggplot(penguins, aes(x = body_mass_g, color = species, fill = species)) +
+  geom_density()
+
+ggplot(penguins, aes(x = body_mass_g, color = species, fill = species)) +
+  geom_density(alpha = 0.5)
+
+ggplot(penguins, aes(x = island, fill = species)) +
+  geom_bar()
+
+ggplot(penguins, aes(x = species, fill = island)) +
+  geom_bar()
+
+ggplot(penguins, aes(x = island, fill = species)) +
+  geom_bar(position = "fill")
+
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point()
+
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point(aes(color = species, shape = island))
+
+
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point(aes(color = species, shape = species)) +
+  facet_wrap(~island)
+
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point(aes(color = species, shape = island)) +
+  facet_wrap(~island)
+
+############################### 1.4 Exercises ###############################
+# 1
+mpg
+# categorical: manufacturer, model, trans, drv, fl, class
+# numrical: displ, year, cyl, cty, hwy
+
+# 2
+mpg |>
+  ggplot(aes(x = hwy, y = displ)) +
+  geom_point()
+
+mpg |>
+  ggplot(aes(x = hwy, y = displ, color = cty)) +
+  geom_point()
+
+mpg |>
+  ggplot(aes(x = hwy, y = displ, size = cty)) +
+  geom_point()
+
+mpg |>
+  ggplot(aes(x = hwy, y = displ, color = cty, size = cty)) +
+  geom_point()
+
+#A continuous variable cannot be mapped to the shape aesthetic.
+mpg |>
+  ggplot(aes(x = hwy, y = displ, shape = cty)) +
+  geom_point()
+
+mpg |>
+  ggplot(aes(x = hwy, y = displ, shape = drv)) +
+  geom_point()
+
+#3
+mpg |>
+  ggplot(aes(x = hwy, y = displ, linewidth = drv)) +
+  geom_point()
+
+#4
+mpg |>
+  ggplot(aes(
+    x=hwy, 
+    y = cty, 
+    size = class, 
+    color = class, 
+    shape = class)) +
+  geom_point(alpha = 0.5)
+
+
+# 5
+penguins |>
+  ggplot(aes(
+    x = bill_depth_mm, y = bill_length_mm
+  )) +
+  geom_point() +
+  geom_smooth(se = FALSE,
+              method = "lm")
+
+penguins |>
+  ggplot(aes(
+    x = bill_depth_mm, y = bill_length_mm, color = species
+  )) +
+  geom_point() +
+  geom_smooth(se = FALSE,
+              method = "lm")
+
+penguins |>
+  ggplot(aes(
+    x = bill_depth_mm, y = bill_length_mm, color = species
+  )) +
+  geom_point() +
+  geom_smooth(se = FALSE,
+              method = "lm")+
+  facet_wrap(~ species)
+
+
+#6
+ggplot(
+  data = penguins,
+  mapping = aes(
+    x = bill_length_mm, y = bill_depth_mm, 
+    color = species, shape = species
+  )
+) +
+  geom_point()
+
+#7
+ggplot(penguins, aes(x = island, fill = species)) +
+  geom_bar(position = "fill")
+
+ggplot(penguins, aes(x = species, fill = island)) +
+  geom_bar(position = "fill")
+
+
+###############################################################################
+
+############################ 1.5 SAVING YOUR PLOTS ###########################
+
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point()
+ggsave(filename = "penguin-plot.png")
+
+
+ggplot(mpg, aes(x = class)) +
+  geom_bar()
+ggplot(mpg, aes(x = cty, y = hwy)) +
+  geom_point()
+ggsave("mpg.jpeg")
 
 
