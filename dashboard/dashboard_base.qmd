@@ -1,0 +1,223 @@
+---
+title: "My dashboard"
+format: 
+  dashboard:
+    theme: 
+      - sandstone
+      - style/custom-light.scss
+---
+
+<!-- Themes: https://bootswatch.com/ -->
+<!-- https://quarto.org/docs/dashboards/theming.html  -->
+
+
+# {.sidebar}
+This is my page global sidebar
+
+```{r}
+library(tidyverse)
+library(plotly)
+library(reactable)
+
+
+# https://rpubs.com/zac-garland/highcharter-chartbook 
+```
+
+
+# Page 1
+## Row 1 {height="30%"}
+### Column 1
+
+```{r}
+#| title: Speed vs. distance
+
+p <- ggplot(cars, aes(speed, dist)) + geom_point()
+ggplotly(p)
+```
+
+### Column 2
+```{r}
+# Título dinâmico
+n_cars <- nrow(mpg)
+cat("title=", "Drive types of", n_cars, "cars" )
+
+ggplot(mpg, aes(x = drv)) + geom_bar()
+```
+
+## Row 2 {height="70%"}
+### Card orientation: column 
+```{r}
+#| title: One cell = one card
+#| layout-ncol: 2
+ggplot(mpg, aes(x = cty, y=hwy)) + geom_point()
+
+ggplot(mpg, aes(x = drv)) + geom_bar()
+
+```
+
+::: {.card title="One cell = one card"}
+```{r}
+plot(women)
+plot(cars)
+```
+:::
+
+# Local sidebar
+## Colunm 1 {.sidebar}
+This is my page level sidebar
+
+## Colunm 2
+### Row 1
+```{r}
+plot(women)
+```
+
+```{r}
+plot(women)
+```
+
+
+### Row 2
+```{r}
+plot(women)
+```
+
+
+
+# Value Boxes
+## Value Boxes  {height=30%}
+```{r}
+#| label: calculate-values
+
+lowest_mileage_cty <- mpg |>
+  filter(cty == min(cty)) |>
+  distinct(cty) |>
+  pull(cty)
+
+
+highest_mileage_cty <- mpg |>
+  filter(cty == max(cty)) |>
+  distinct(cty) |>
+  pull(cty)
+
+
+rounded_mean_city_mileage <- mpg |>
+  summarize(round(mean(cty), 2)) |>
+  pull()
+```
+
+```{r}
+#| content: valuebox
+#| title: "Least efficient"
+#| icon: fuel-pump-fill
+#| color: danger
+
+list(value = paste(lowest_mileage_cty), "mpg")
+```
+
+
+```{r}
+#| content: valuebox
+#| title: "Most efficient"
+
+list(
+  icon = "fuel-pump",
+  color = "success",
+  value = paste(highest_mileage_cty), "mpg")
+```
+
+
+::: {.valuebox icon="fuel-pump" color="secondary"}
+Average city mileage
+
+`{r} rounded_mean_city_mileage` mpg
+:::
+
+
+## Row 1 {height=70%}
+### Column 1
+```{r}
+p1 <- ggplot(cars, aes(speed, dist)) + geom_point()
+ggplotly(p1)
+```
+
+### Column 2 
+```{r}
+p2 <-  ggplot(women, aes(weight, height)) + geom_point()
+ggplotly(p2)
+```
+
+
+
+
+
+
+
+
+# Testando Layout 2
+## Row 1 {height=60%}
+### Column 1
+```{r}
+p1 <- ggplot(cars, aes(speed, dist)) + geom_point()
+ggplotly(p1)
+```
+
+### Column 2
+```{r}
+p2 <-  ggplot(women, aes(weight, height)) + geom_point()
+ggplotly(p2)
+```
+
+```{r}
+plot(cars)
+```
+
+
+## Row 2 {height=40%} {.tabset}
+```{r}
+plot(women)
+```
+
+```{r}
+plot(cars)
+
+```
+
+
+
+
+
+# Tabs
+## Row 1 {height=60%}
+### Column 1
+```{r}
+p1 <- ggplot(cars, aes(speed, dist)) + geom_point()
+ggplotly(p1)
+```
+
+### Column 2  {.tabset}
+```{r}
+p2 <-  ggplot(women, aes(weight, height)) + geom_point()
+ggplotly(p2)
+```
+
+```{r}
+plot(cars)
+```
+
+
+## Row 2 {height=40%} 
+### Column 1
+hello
+
+### Column 2  {.tabset}
+```{r}
+plot(women)
+```
+
+```{r}
+plot(cars)
+
+```
+
+
