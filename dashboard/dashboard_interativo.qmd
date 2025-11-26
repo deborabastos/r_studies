@@ -1,260 +1,85 @@
 ---
-title: "Assimetrias Bilaterais de Comércio"
+title: "Flexdashboard Penguin"
 format: 
   dashboard:
-    orientation: rows
+    orientation: columns
     vertical_layout: fill
-    sidebar:
-      width: 300px
 runtime: shiny
 ---
 
 
-
-```{r}
-#| label: load packages
-#| message: false
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(palmerpenguins)
 library(tidyverse)
-library(glue)
-library(gt)
-library(scales)
-library(reactable)
-library(htmltools)
-library(bslib)
-library(bsicons)
+library(ggridges)
 library(shiny)
-library(here)
 
+df <- penguins
 
-# atenção que o arquivo _quarto.yml define que o diretório de trabalho é a raiz
-# do projeto e não o diretório onde o arquivo .qmd está
-
-source(here("R/funcoes_aux.R"))
-source(here("R/busca_dados_bd.R"))
-source(here("R/lista_bloco_paises.R"))
-source(here("R/funcoes_gera_tudo.R"))
-
-
+df |> count(species)
 ```
 
-```{r}
-#| label: load data
-# Carrega dados
-dados <- carrega_tudo(2015:2024)
-# names(dados)
-
-## extrai dataframes
-imp_br_todos_ncm <- dados$imp_br_todos_ncm_2015_2024
-exp_br_todos_ncm <- dados$exp_br_todos_ncm_2015_2024
-imp_todos_br_hs6 <- dados$imp_todos_br_hs6_2015_2024
-exp_todos_br_hs6 <- dados$exp_todos_br_hs6_2015_2024
-nomes_hs <- dados$nomes_hs
-nomes_paises <- dados$nomes_paises
-
-```
-
+## Column {.sidebar}
 
 ```{r}
-#| label: prep data
-# Cria grandes tabelas
-# Importação Brasil (do país) - SECEX NCM -> HS6
-imp_br_todos_hs <- imp_br_todos_ncm |>
-  mutate(
-    hs6 = substr(co_ncm, 1, 6),
-    imp_cif = (imp_fob + imp_frete + imp_seguro),
-    co_ano = as.integer(co_ano)
-  ) |>
-  relocate(hs6, .after = co_ncm) |>
-  select(co_ano, no_pais_ing, hs6, imp_fob) |>
-  rename(year = co_ano, imp_br_fob_total = imp_fob) |>
-  group_by(year, no_pais_ing, hs6) |>
-  summarise(
-    across(c(imp_br_fob_total), \(x) sum(x, na.rm = TRUE)),
-    .groups = "drop"
-  ) |>
-  mutate(capitulo_hs = substr(hs6, 1, 2)) |>
-  relocate(capitulo_hs, .after = hs6)
-
-
-# Exportação Brasil (para o país) - SECEX NCM -> HS6
-exp_br_todos_hs <- exp_br_todos_ncm |>
-  mutate(hs6 = substr(co_ncm, 1, 6), co_ano = as.integer(co_ano)) |>
-  relocate(hs6, .after = co_ncm) |>
-  select(co_ano, no_pais_ing, hs6, exp_fob) |>
-  rename(year = co_ano, exp_br_fob_total = exp_fob) |>
-  group_by(year, no_pais_ing, hs6) |>
-  summarise(
-    across(c(exp_br_fob_total), \(x) sum(x, na.rm = TRUE)),
-    .groups = "drop"
-  ) |>
-  mutate(capitulo_hs = substr(hs6, 1, 2)) |>
-  relocate(capitulo_hs, .after = hs6)
-
-
-# Importação País (do Brasil) - Comtrade (reporter == country)
-imp_todos_br_hs6 <- imp_todos_br_hs6 |>
-  mutate(capitulo_hs = substr(commodity_code, 1, 2)) |>
-  relocate(capitulo_hs, .after = commodity_code) |>
-  select(year, reporter, commodity_code, capitulo_hs, trade_value) |>
-  rename(hs6 = commodity_code, no_pais_ing = reporter, imp_pais_fob_total = trade_value)
-
-# Exportação País (para o Brasil) - Comtrade (reporter == country)
-exp_todos_br_hs6 <- exp_todos_br_hs6 |>
-  mutate(capitulo_hs = substr(commodity_code, 1, 2)) |>
-  relocate(capitulo_hs, .after = commodity_code) |>
-  select(year, reporter, commodity_code, capitulo_hs, trade_value) |>
-  rename(hs6 = commodity_code, no_pais_ing = reporter, exp_pais_fob_total = trade_value)
-
-
-assimetrias_todos_i <- imp_br_todos_hs |>
-  full_join(exp_todos_br_hs6, by = c("year", "no_pais_ing", "hs6", "capitulo_hs")) |>
-  mutate(
-    across(
-      .cols = c(
-        imp_br_fob_total,
-        exp_pais_fob_total
-      ),
-      .fns = ~ tidyr::replace_na(.x, 0)
-    )
-  ) |>
-  mutate(assimetria_ie = imp_br_fob_total - exp_pais_fob_total) 
-
-
-assimetrias_todos_e <- exp_br_todos_hs |>
-  full_join(imp_todos_br_hs6, by = c("year", "no_pais_ing", "hs6", "capitulo_hs")) |>
-  mutate(
-    across(
-      .cols = c(
-        exp_br_fob_total,
-        imp_pais_fob_total
-      ),
-      .fns = ~ tidyr::replace_na(.x, 0)
-    )
-  ) |>
-  mutate(assimetria_ei = exp_br_fob_total - imp_pais_fob_total) 
-
-# Cria tabelão por ano, país, HS6 contendo dados imp_br_fob_total, exp_pais_fob_total, exp_br_fob_total, imp_pais_fob_total
-assimetrias_ie_ei_hs <- assimetrias_todos_i |>
-  full_join(assimetrias_todos_e, by = c("year", "no_pais_ing", "hs6", "capitulo_hs")) |>
-  mutate(
-    across(
-      .cols = c(
-        imp_br_fob_total,
-        exp_pais_fob_total,
-        exp_br_fob_total,
-        imp_pais_fob_total,
-        assimetria_ie,
-        assimetria_ei),
-      .fns = ~ tidyr::replace_na(.x, 0)
-    )) |>
-  select(year, no_pais_ing, hs6, capitulo_hs, imp_br_fob_total, exp_pais_fob_total, exp_br_fob_total, imp_pais_fob_total, assimetria_ie, assimetria_ei)
-
-# Cria tabela por ano, país, capítulo com imp_br, exp_pais, exp_br, imp_pais 
-assimetria_ie_ei_capitulo <- assimetrias_ie_ei_hs |>
-  group_by(year, no_pais_ing, capitulo_hs) |>
-  summarise(
-    across(
-      c(imp_br_fob_total, exp_pais_fob_total, exp_br_fob_total, imp_pais_fob_total, assimetria_ie, assimetria_ei), 
-      \(x) sum(x, na.rm = TRUE)))
-
-
-
-# Cria tabela por ano e país - não considera blocos
-assimetria_ie_ei_ano <- assimetrias_ie_ei_hs |>
-  group_by(year, no_pais_ing) |>
-  summarise(
-    across(
-      c(imp_br_fob_total, exp_pais_fob_total, exp_br_fob_total, imp_pais_fob_total, assimetria_ie, assimetria_ei), 
-      \(x) sum(x, na.rm = TRUE)))
-
-
-```
-
-
-
-```{r}
-#| label: input ano
-#| context: ui
-
-anos_disponiveis <- unique(assimetria_ie_ei_ano$year)
-max_ano <- max(anos_disponiveis)
-
-selectizeInput(
-inputId = "ano_selecionado",
-label = "Selecione o Ano:",
-choices = sort(anos_disponiveis, decreasing = TRUE),
-selected = max_ano,
-options = list(placeholder = "Selecione um ano")
+selectInput("v_species",
+  label = "Species",
+  choices = c("All", unique(df$species)),
+  selected = "All"
 )
+
 ```
 
-# Assimetrias Totais
-## Row 1
-### Column 1
+## Column {data-width="500"}
+
+### Chart A
+
 ```{r}
-#| context: server
-# title: Assimetrias totais com Parceiros Selecionados
-
 renderPlot({
-  ano_escolhido <- as.integer(input$ano_selecionado)
-  
-  assimetrias_selecionados <- assimetria_ie_ei_ano |>
-    mutate(
-      bloco = case_when(
-        no_pais_ing %in% paises_mercosul ~ "Mercosul",
-        no_pais_ing %in% paises_ue ~ "UE",
-        no_pais_ing %in% outros_paises_selecionados ~ no_pais_ing,
-        TRUE ~ "Resto do Mundo"
-      )
-    ) |>
-    filter(bloco != "Resto do Mundo", year == ano_escolhido) |> 
-    select(year, bloco, no_pais_ing, assimetria_ie, assimetria_ei) |>
-    group_by(bloco) |>
-    summarise(assimetria_total_ie = sum(assimetria_ie), assimetria_total_ei = sum(assimetria_ei)) |>
-    pivot_longer(
-      cols = c(assimetria_total_ie, assimetria_total_ei),
-      names_to = "tipo_assimetria",
-      values_to = "assimetria_total"
-    ) |>
-    mutate(
-      bloco = forcats::fct_reorder(
-        .f = bloco,
-        .x = abs(assimetria_total),
-        .fun = sum,
-        .desc = TRUE
-      )
-    )
+  df |>
+    select() |>
+    pivot_longer() |>
+    group_by() |>
+    mutate() |>
+    ungroup() |>
+    filter() |>
+    ggplot() +
+    geom_density_ridges() +
+    theme(legend.position = "top") +
+    labs(y = "", x = "")
+})
+```
 
-  # Plota gráfico (última expressão retornada)
-  ggplot(
-    assimetrias_selecionados,
-    aes(
-      x = bloco,
-      y = assimetria_total / 1e9,
-      fill = tipo_assimetria,
-      width = 0.5
-    )
-  ) +
-    geom_col(position = "dodge") +
-    scale_fill_discrete(
-      labels = c(
-        "assimetria_total_ei" = "DIF(E)",
-        "assimetria_total_ie" = "DIF(I)"
-      ),
-      name = NULL
-    ) +
-    labs(
-      x = "Parceiro",
-      y = "Valor da assimetria (bilhões USD)",
-      title = glue::glue("Assimetrias Absolutas de Comércio - Países selecionados - {ano_escolhido}")
-    ) +
-    scale_y_continuous(
-      labels = scales::dollar_format(prefix = "$", scale = 1, suffix = "B")
-    ) +
-    theme(
-      legend.position = "bottom"
-    ) +
-    theme_minimal()
-}) # <-- FIM DO CONTEXTO REATIVO
+## Column {data-width="500"}
 
+### Chart B
+
+```{r}
+df |>
+  select(-island, -sex) |>
+  pivot_longer(-species) |>
+  group_by(name) |>
+  mutate(value = scale(value)) |>
+  ungroup() |>
+  ggplot(aes(x = name, y = value, color = species)) +
+  geom_boxplot() +
+  theme(legend.position = "top") +
+  labs(x = "", y = "")
+```
+
+### Chart C
+
+```{r}
+df |>
+  count(species, island) |>
+  drop_na() |>
+  group_by(species) |>
+  mutate(n = n / sum(n)) |>
+  ungroup() |>
+  ggplot(aes(x = species, y = n, fill = island)) +
+  geom_col() +
+  theme(legend.position = "top") +
+  scale_y_continuous(labels = scales::label_percent()) +
+  labs(y = "", x = "")
 ```

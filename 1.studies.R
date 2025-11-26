@@ -53,6 +53,13 @@ ggplot(
   geom_point() +
   geom_smooth(method = "lm")
 
+ggplot(
+  data = penguins,
+  mapping = aes(x = bill_length_mm, y = bill_depth_mm)
+) +
+  geom_point(aes(color = species)) +
+  geom_smooth(method = "lm")
+
 
 # 4
 ggplot(

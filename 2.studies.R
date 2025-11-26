@@ -32,7 +32,7 @@ flights |>
     arr_delay = mean(arr_delay, na.rm = TRUE)
   )
 
-
+# flights that departed more than 120 minutes (two hours) late
 flights |>
   filter(dep_delay > 120)
 
@@ -48,11 +48,11 @@ flights |>
 flights |>
   filter(month %in% c(1, 2))
 
-
+# orders flights by date and departure time
 flights |>
   arrange(year, month, day, dep_time)
 
-
+# orders flights from most to least delayed
 flights |>
   arrange(desc(dep_delay))
 
@@ -111,7 +111,7 @@ flights |>
 
 flights |>
   mutate(speed = (distance / air_time)) |>
-  arrange(desc(distance / air_time)) |>
+  arrange(desc(speed)) |>
   View()
 
 # Ou pode estar falando do voo mais curto
@@ -186,25 +186,25 @@ flights |>
   select(year, month, day)
 
 flights |>
-  select(year:day) 
+  select(year:day)
 
-flights |> 
+flights |>
   select(!year:day)
 
-flights |> 
+flights |>
   select(where(is.character))
 
-flights |> 
+flights |>
   select(starts_with("d"))
 
-flights |> 
+flights |>
   select(ends_with("delay"))
 
 flights |>
   select(contains("arr"))
 
 # You can rename variables as you select() them by using =
-flights |> 
+flights |>
   select(tail_num = tailnum)
 
 # If you want to keep all the existing variables and just want to rename a few, you can use rename()
@@ -245,9 +245,8 @@ select(flights, all_of(variables))
 
 select(flights, any_of(variables))
 
+# modos avançados
 select(flights, !!variables)
-
-
 select(flights, matches("^(dep|arr)_(time|delay)$"))
 
 
