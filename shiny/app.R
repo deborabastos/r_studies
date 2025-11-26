@@ -21,4 +21,11 @@ server <- function(input, output) {
   })
 }
 
-shinyApp(ui = ui, server = server, options = list(launch.browser = FALSE, port = 4242)) # nolint: line_length_linter.
+# shinyApp(ui = ui, server = server, options = list(launch.browser = FALSE, port = 4242))
+
+shinyApp(ui = ui, server = server)
+
+
+
+
+plot(cars)

@@ -25,7 +25,7 @@ ggplot(
     subtitle = "Dimensions for Adelie, Chinstrap, and Gentoo Penguins",
     x = "Flipper length (mm)", y = "Body mass (g)",
     color = "Species", shape = "Species"
-  ) +
+  ) + 
   scale_color_colorblind()
 ############################### 1.2 Exercises ###############################
 # 1

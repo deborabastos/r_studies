@@ -22,13 +22,13 @@ The `penguins` data from the [**palmerpenguins**](https://allisonhorst.github.io
 #| warning: false
 #| echo: false
 ggplot(penguins, aes(x = flipper_length_mm, y = bill_length_mm)) +
-	geom_point(aes(color = species, shape = species)) +
-	scale_color_manual(values = c("darkorange", "purple", "cyan4")) +
-	labs(
-		x = "Flipper length (mm)",
-		y = "Bill length (mm)",
-		color = "Penguin species",
-		shape = "Penguin species"
-	) +
-	theme_minimal()
+  geom_point(aes(color = species, shape = species)) +
+  scale_color_manual(values = c("darkorange", "purple", "cyan4")) +
+  labs(
+    x = "Flipper length (mm)",
+    y = "Bill length (mm)",
+    color = "Penguin species",
+    shape = "Penguin species"
+  ) +
+  theme_minimal()
 ```
