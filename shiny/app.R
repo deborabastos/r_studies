@@ -1,31 +1,48 @@
 library(shiny)
+library(tidyverse)
 
+# User Interface
 ui <- fluidPage(
-  titlePanel("Página"),
-  selectInput(
-    inputId = "select",
-    label = "Select",
-    choices = c("1", "2", "3"),
-    selected = "1"
-  ),
-  textOutput("text")
+  titlePanel("Meu APP"),
+  textOutput(outputId = "text"),
+  tableOutput(outputId = "table"),
+  plotOutput(outputId = "plot"),
+  plotOutput(outputId = "ggplot")
 )
 
+
+# Programa que roda por trás do app: todo código R que vai definir as
+# visualizaçs que aparecerão na tela
 server <- function(input, output) {
-  output$text <- renderText({
-    # para a renderização e deixa verificar variáveis no terminal - input$select
-    # Para o browser() continuar a rodar o código: c
-    # Para sair do browser(): Q ou f???
-    # browser()
-    paste("O número é", input$select)
+  
+  output$plot <- renderPlot({
+    plot(x = mtcars$wt, y = mtcars$mpg)
   })
+
+  output$ggplot <- renderPlot({
+    mtcars |>
+      ggplot(aes(x = wt, y = mpg)) +
+      geom_point()
+  })
+
+  output$table <- renderTable({
+    mtcars |>
+      group_by(cyl) |>
+      summarise(
+        mpg = mean(mpg)
+      ) |>
+      rename(
+        "Número de cilindros" = cyl,
+        "Consumo de combustível (milhas/galão)" = mpg
+      )
+  })
+
+  output$text <- renderText({
+    versao <- paste0(R.version$major, ".", R.version$minor)
+    paste0("A versão do R utilizada é: ", versao) # Sempre a última linha será retornada
+  })
+
 }
 
-# shinyApp(ui = ui, server = server, options = list(launch.browser = FALSE, port = 4242))
 
-shinyApp(ui = ui, server = server)
-
-
-
-
-plot(cars)
+shinyApp(ui, server)
