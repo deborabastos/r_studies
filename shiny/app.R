@@ -4,6 +4,11 @@ library(tidyverse)
 # User Interface
 ui <- fluidPage(
   titlePanel("Meu APP"),
+  selectInput(
+    inputId = "variavel",
+    label = "Selecione uma variável",
+    choices = names(mtcars)
+  ),
   textOutput(outputId = "text"),
   tableOutput(outputId = "table"),
   plotOutput(outputId = "plot"),
@@ -16,12 +21,12 @@ ui <- fluidPage(
 server <- function(input, output) {
   
   output$plot <- renderPlot({
-    plot(x = mtcars$wt, y = mtcars$mpg)
+    plot(x = mtcars[[input$variavel]], y = mtcars$mpg)
   })
 
   output$ggplot <- renderPlot({
     mtcars |>
-      ggplot(aes(x = wt, y = mpg)) +
+      ggplot(aes(.data[[input$variavel]], y = mpg)) + # .data representa o df enviado ao ggplot
       geom_point()
   })
 
