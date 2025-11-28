@@ -17,7 +17,8 @@ ui <- fluidPage(
     label = "Variável do eixo x do gráfico B",
     choices = names(mtcars),
     selected = "wt"
-  )
+  ),
+  plotOutput(outputId = "grafico_B")
 )
 
 server <- function(input, output, session) {
@@ -26,7 +27,7 @@ server <- function(input, output, session) {
     mtcars |>
       ggplot() +
       geom_point(aes(x = .data[[input$variavel_A]], y = mpg))
-  }),
+  })
   
   output$grafico_B <- renderPlot({
       print("Rodei código variável B")
@@ -34,7 +35,6 @@ server <- function(input, output, session) {
         ggplot() +
           geom_point(aes(x = .data[[input$variavel_B]], y = mpg))
     })
-
 }
 
 shinyApp(ui, server)
