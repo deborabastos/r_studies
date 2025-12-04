@@ -19,15 +19,9 @@ ui <- fluidPage(
 # Programa que roda por trás do app: todo código R que vai definir as
 # visualizaçs que aparecerão na tela
 server <- function(input, output) {
-  
-  output$plot <- renderPlot({
-    plot(x = mtcars[[input$variavel]], y = mtcars$mpg)
-  })
-
-  output$ggplot <- renderPlot({
-    mtcars |>
-      ggplot(aes(.data[[input$variavel]], y = mpg)) + # .data representa o df enviado ao ggplot
-      geom_point()
+  output$text <- renderText({
+    versao <- paste0(R.version$major, ".", R.version$minor)
+    paste0("A versão do R utilizada é: ", versao) # Sempre a última linha será retornada
   })
 
   output$table <- renderTable({
@@ -42,11 +36,15 @@ server <- function(input, output) {
       )
   })
 
-  output$text <- renderText({
-    versao <- paste0(R.version$major, ".", R.version$minor)
-    paste0("A versão do R utilizada é: ", versao) # Sempre a última linha será retornada
+  output$plot <- renderPlot({
+    plot(x = mtcars[[input$variavel]], y = mtcars$mpg)
   })
 
+  output$ggplot <- renderPlot({
+    mtcars |>
+      ggplot(aes(.data[[input$variavel]], y = mpg)) + # .data representa o df enviado ao ggplot
+      geom_point()
+  })
 }
 
 

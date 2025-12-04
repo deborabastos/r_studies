@@ -10,6 +10,7 @@ ui <- fluidPage(
   textOutput(
     outputId = "saudacao"
   ),
+  hr(),
   selectInput(
     inputId = "variavel",
     label = "Selecione uma variável",
@@ -29,9 +30,9 @@ server <- function(input, output) {
     paste0("Você selecionou a ", input$variavel)
   })
 
-  output$var <- renderText({
-    paste0("Olá ", input$nome, ", você selecionou a ", input$variavel)
-  })
+  # output$var <- renderText({
+  #   paste0("Olá ", input$nome, ", você selecionou a ", input$variavel)
+  # })
 }
 
 shinyApp(ui, server)
